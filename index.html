@@ -1,0 +1,544 @@
+<!DOCTYPE html>
+<html lang="es" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Juan Amorós | Portfolio</title>
+    
+    <!-- React & ReactDOM -->
+    <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
+    <!-- Babel for JSX -->
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        dark: '#0B0F19',
+                        darker: '#05070A',
+                        accent: '#38bdf8', // Light blue
+                        accentHover: '#0284c7'
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'system-ui', '-apple-system', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        /* Import Inter Font */
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+
+        body {
+            background-color: #0B0F19;
+            color: #f8fafc;
+            overflow-x: hidden;
+        }
+
+        /* Ambient Background Glows */
+        .bg-glow-1 {
+            position: fixed; top: -10%; left: -10%; width: 50vw; height: 50vw;
+            background: radial-gradient(circle, rgba(56,189,248,0.08) 0%, rgba(11,15,25,0) 70%);
+            z-index: -1; pointer-events: none;
+        }
+        .bg-glow-2 {
+            position: fixed; bottom: -10%; right: -10%; width: 50vw; height: 50vw;
+            background: radial-gradient(circle, rgba(168,85,247,0.05) 0%, rgba(11,15,25,0) 70%);
+            z-index: -1; pointer-events: none;
+        }
+
+        /* Professional Glassmorphism */
+        .glass-card {
+            background: rgba(255, 255, 255, 0.02);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .glass-card:hover {
+            background: rgba(255, 255, 255, 0.04);
+            border-color: rgba(56, 189, 248, 0.3);
+            transform: translateY(-4px);
+            box-shadow: 0 12px 40px -10px rgba(56, 189, 248, 0.15);
+        }
+
+        /* Timeline specific */
+        .timeline-dot {
+            transition: all 0.3s ease;
+        }
+        .timeline-item:hover .timeline-dot {
+            background-color: #38bdf8;
+            box-shadow: 0 0 15px rgba(56, 189, 248, 0.6);
+            transform: scale(1.2);
+        }
+
+        /* Fade In Animations */
+        .fade-in {
+            opacity: 0;
+            transform: translateY(20px);
+            animation: fadeInUp 0.8s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+        }
+
+        @keyframes fadeInUp {
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .delay-100 { animation-delay: 100ms; }
+        .delay-200 { animation-delay: 200ms; }
+        .delay-300 { animation-delay: 300ms; }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: #05070A; }
+        ::-webkit-scrollbar-thumb { background: #1e293b; border-radius: 10px; }
+        ::-webkit-scrollbar-thumb:hover { background: #38bdf8; }
+
+        /* Profile Image Hover */
+        .profile-img-container {
+            position: relative;
+            border-radius: 20px;
+            overflow: hidden;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: all 0.5s ease;
+        }
+        .profile-img-container::after {
+            content: '';
+            position: absolute; inset: 0;
+            background: linear-gradient(to top, rgba(11,15,25,0.8) 0%, transparent 50%);
+        }
+        .profile-img-container:hover {
+            border-color: #38bdf8;
+            box-shadow: 0 0 30px rgba(56, 189, 248, 0.2);
+            transform: scale(1.02);
+        }
+        .profile-img-container img {
+            transition: all 0.7s ease;
+        }
+        .profile-img-container:hover img {
+            transform: scale(1.05);
+            filter: brightness(1.1);
+        }
+    </style>
+</head>
+<body>
+    <div class="bg-glow-1"></div>
+    <div class="bg-glow-2"></div>
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState, useEffect } = React;
+
+        // --- DATA & TRANSLATIONS ---
+        const data = {
+            es: {
+                nav: { about: "Sobre mí", experience: "Experiencia", education: "Educación", skills: "Habilidades" },
+                hero: {
+                    role: "Profesional Multidisciplinar & Técnico",
+                    location: "Murcia, España / Rudolstetten, Suiza",
+                    contactBtn: "Contactar"
+                },
+                about: {
+                    title: "Perfil Profesional",
+                    text: "Soy una persona amable, tranquila, respetuosa y trabajadora. Estoy acostumbrado a trabajar bajo presión, no me derrumbo ante los desafíos, y busco constantemente un entorno donde poder crecer personal y profesionalmente aportando siempre mi mejor versión."
+                },
+                experience: {
+                    title: "Experiencia Laboral",
+                    items: [
+                        { role: "Montador de turbos", company: "BorgWarner", date: "2022 - 2023", desc: "Manejo y profundos conocimientos de maquinaria industrial. Mantenimiento y limpieza exhaustiva de la zona de trabajo." },
+                        { role: "Manipulador de equipaje", company: "Fraport", date: "2022", desc: "Gestión y manejo de equipaje. Uso avanzado de códigos aeroportuarios y maquinaria específica." },
+                        { role: "Repartidor", company: "Grupo Logístico Jimenez Ponce (Murcia)", date: "2020 - 2022", desc: "Preparación y optimización de rutas. Traslado seguro de mercancía, mantenimiento del vehículo y trato directo al cliente." },
+                        { role: "Técnico en Emergencias Sanitarias", company: "Ambulancias Autónomas / Civera / Pascual / SAMU", date: "2017 - 2021", desc: "Mantenimiento preventivo de vehículos de emergencia. Traslado seguro de pacientes, conducción evasiva y trabajo bajo alta presión. Manejo de software sanitario y excelente trato humano." },
+                        { role: "Mantenimiento General", company: "Curtidos Requena / Curtidos Valiente", date: "2016 - 2017", desc: "Reparación y mantenimiento preventivo de maquinaria industrial. Conocimientos aplicados en pintura, albañilería y electricidad." },
+                        { role: "Camarero", company: "Restaurante La Amistad", date: "2014 - 2016", desc: "Atención al cliente en entornos de alta demanda. Trabajo eficiente bajo presión y dominio de la oferta gastronómica." }
+                    ]
+                },
+                education: {
+                    title: "Formación & Certificaciones",
+                    items: [
+                        { degree: "eJPT - Junior Penetration Tester", school: "eLearnSecurity", date: "2024", image: "ejpt", desc: "Certificación práctica en ciberseguridad y pentesting." },
+                        { degree: "Técnico en Emergencias Sanitarias", school: "ITEP, Madrid", date: "2019 - 2021" },
+                        { degree: "Técnico en Transporte Sanitario", school: "Amusal, Murcia", date: "2017" },
+                        { degree: "Curso de Lengua de Signos", school: "ASPANPAL, Murcia", date: "2015" },
+                        { degree: "Voluntariado Internacional", school: "Marruecos & Israel", date: "2012 - 2013", desc: "Asistencia en orfanatos, apoyo a niños con discapacidad auditiva y Síndrome de Down, y ayuda comunitaria en zonas de conflicto." }
+                    ]
+                },
+                skills: {
+                    title: "Habilidades & Idiomas",
+                    soft: ["Trabajo bajo presión", "Gestión de equipos", "Resolución de problemas", "Adaptabilidad", "Comunicación efectiva", "Orientación a resultados"],
+                    tech: ["Ciberseguridad (eJPT)", "Manejo de maquinaria", "Mantenimiento técnico", "Logística de rutas", "Dominio informático", "Primeros auxilios"],
+                    langs: [{name: "Español", level: "Nativo"}, {name: "Inglés", level: "A1"}, {name: "Alemán", level: "A2"}, {name: "Árabe", level: "Básico"}]
+                },
+                contact: {
+                    title: "Contacto",
+                    emailLabel: "Correo Electrónico",
+                    phoneLabel: "Teléfono"
+                }
+            },
+            en: {
+                nav: { about: "About", experience: "Experience", education: "Education", skills: "Skills" },
+                hero: {
+                    role: "Multidisciplinary Professional & Technician",
+                    location: "Murcia, Spain / Rudolstetten, Switzerland",
+                    contactBtn: "Get in touch"
+                },
+                about: {
+                    title: "Professional Profile",
+                    text: "I am a kind, calm, respectful, and hardworking individual. I am used to working under pressure, I do not break down in the face of challenges, and I am constantly looking for an environment where we can grow together while I give my absolute best."
+                },
+                experience: {
+                    title: "Work Experience",
+                    items: [
+                        { role: "Turbo Assembler", company: "BorgWarner", date: "2022 - 2023", desc: "Operation and deep knowledge of industrial machinery. Thorough maintenance and cleaning of the work area." },
+                        { role: "Baggage Handler", company: "Fraport", date: "2022", desc: "Baggage management and handling. Advanced use of airport codes and specific machinery." },
+                        { role: "Delivery Driver", company: "Grupo Logístico Jimenez Ponce (Murcia)", date: "2020 - 2022", desc: "Route preparation and optimization. Safe transport of goods, vehicle maintenance, and direct customer service." },
+                        { role: "Emergency Medical Technician (EMT)", company: "Ambulancias Autónomas / Civera / Pascual / SAMU", date: "2017 - 2021", desc: "Preventive maintenance of emergency vehicles. Safe patient transport, evasive driving, and high-pressure work. Health software management and excellent patient care." },
+                        { role: "General Maintenance", company: "Curtidos Requena / Curtidos Valiente", date: "2016 - 2017", desc: "Repair and preventive maintenance of industrial machinery. Applied knowledge in painting, masonry, and electricity." },
+                        { role: "Waiter", company: "Restaurante La Amistad", date: "2014 - 2016", desc: "Customer service in high-demand environments. Efficient work under pressure and mastery of the menu." }
+                    ]
+                },
+                education: {
+                    title: "Education & Certifications",
+                    items: [
+                        { degree: "eJPT - Junior Penetration Tester", school: "eLearnSecurity", date: "2024", image: "ejpt", desc: "Practical certification in cybersecurity and penetration testing." },
+                        { degree: "Emergency Medical Technician", school: "ITEP, Madrid", date: "2019 - 2021" },
+                        { degree: "Medical Transport Technician", school: "Amusal, Murcia", date: "2017" },
+                        { degree: "Sign Language Course", school: "ASPANPAL, Murcia", date: "2015" },
+                        { degree: "International Volunteering", school: "Morocco & Israel", date: "2012 - 2013", desc: "Assistance in orphanages, support for children with hearing impairments and Down Syndrome, and community help in conflict zones." }
+                    ]
+                },
+                skills: {
+                    title: "Skills & Languages",
+                    soft: ["Working under pressure", "Team management", "Problem solving", "Adaptability", "Effective communication", "Results-oriented"],
+                    tech: ["Cybersecurity (eJPT)", "Machinery operation", "Technical maintenance", "Route logistics", "Computer proficiency", "First aid"],
+                    langs: [{name: "Spanish", level: "Native"}, {name: "English", level: "A1"}, {name: "German", level: "A2"}, {name: "Arabic", level: "Basic"}]
+                },
+                contact: {
+                    title: "Contact",
+                    emailLabel: "Email Address",
+                    phoneLabel: "Phone Number"
+                }
+            },
+            de: {
+                nav: { about: "Über mich", experience: "Erfahrung", education: "Ausbildung", skills: "Fähigkeiten" },
+                hero: {
+                    role: "Multidisziplinärer Profi & Techniker",
+                    location: "Murcia, Spanien / Rudolstetten, Schweiz",
+                    contactBtn: "Kontaktieren"
+                },
+                about: {
+                    title: "Berufliches Profil",
+                    text: "Ich bin eine freundliche, ruhige, respektvolle und fleißige Person. Ich bin es gewohnt, unter Druck zu arbeiten, lasse mich von Herausforderungen nicht entmutigen und suche ständig nach einem Umfeld, in dem wir gemeinsam wachsen können und ich mein Bestes geben kann."
+                },
+                experience: {
+                    title: "Berufserfahrung",
+                    items: [
+                        { role: "Turbolader-Monteur", company: "BorgWarner", date: "2022 - 2023", desc: "Bedienung und fundierte Kenntnisse von Industriemaschinen. Gründliche Wartung und Reinigung des Arbeitsbereichs." },
+                        { role: "Gepäckabfertiger", company: "Fraport", date: "2022", desc: "Gepäckmanagement und -abfertigung. Erweiterte Nutzung von Flughafencodes und spezifischen Maschinen." },
+                        { role: "Auslieferungsfahrer", company: "Grupo Logístico Jimenez Ponce", date: "2020 - 2022", desc: "Routenvorbereitung und -optimierung. Sicherer Warentransport, Fahrzeugwartung und direkter Kundenservice." },
+                        { role: "Rettungssanitäter", company: "Ambulancias Autónomas / Civera / Pascual", date: "2017 - 2021", desc: "Präventive Wartung von Einsatzfahrzeugen. Sicherer Patiententransport, Ausweichfahren und Arbeiten unter hohem Druck. Gesundheitssoftware-Management und exzellente Patientenbetreuung." },
+                        { role: "Allgemeine Instandhaltung", company: "Curtidos Requena / Valiente", date: "2016 - 2017", desc: "Reparatur und präventive Wartung von Industriemaschinen. Angewandte Kenntnisse in Malerei, Mauerwerk und Elektrizität." },
+                        { role: "Kellner", company: "Restaurante La Amistad", date: "2014 - 2016", desc: "Kundenservice in stark frequentierten Umgebungen. Effizientes Arbeiten unter Druck und Beherrschung der Speisekarte." }
+                    ]
+                },
+                education: {
+                    title: "Ausbildung & Zertifizierungen",
+                    items: [
+                        { degree: "eJPT - Junior Penetration Tester", school: "eLearnSecurity", date: "2024", image: "ejpt", desc: "Praktische Zertifizierung in Cybersicherheit und Penetrationstests." },
+                        { degree: "Rettungssanitäter", school: "ITEP, Madrid", date: "2019 - 2021" },
+                        { degree: "Krankentransport-Techniker", school: "Amusal, Murcia", date: "2017" },
+                        { degree: "Gebärdensprachkurs", school: "ASPANPAL, Murcia", date: "2015" },
+                        { degree: "Internationale Freiwilligenarbeit", school: "Marokko & Israel", date: "2012 - 2013", desc: "Hilfe in Waisenhäusern, Unterstützung von Kindern mit Hörbehinderungen und Down-Syndrom sowie Gemeinschaftshilfe in Konfliktgebieten." }
+                    ]
+                },
+                skills: {
+                    title: "Fähigkeiten & Sprachen",
+                    soft: ["Arbeiten unter Druck", "Teammanagement", "Problemlösung", "Anpassungsfähigkeit", "Effektive Kommunikation", "Ergebnisorientiert"],
+                    tech: ["Cybersicherheit (eJPT)", "Maschinenbedienung", "Technische Wartung", "Routenlogistik", "Computerkenntnisse", "Erste Hilfe"],
+                    langs: [{name: "Spanisch", level: "Muttersprache"}, {name: "Englisch", level: "A1"}, {name: "Deutsch", level: "A2"}, {name: "Arabisch", level: "Grundkenntnisse"}]
+                },
+                contact: {
+                    title: "Kontakt",
+                    emailLabel: "E-Mail-Adresse",
+                    phoneLabel: "Telefonnummer"
+                }
+            }
+        };
+
+        // --- ICONS & SVGS ---
+        const Icons = {
+            Mail: () => <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path></svg>,
+            Phone: () => <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"></path></svg>,
+            MapPin: () => <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>,
+            Calendar: () => <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>,
+            ArrowRight: () => <svg className="w-4 h-4 opacity-0 -ml-4 group-hover:opacity-100 group-hover:ml-0 transition-all duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
+        };
+
+        // Reproducción Nativa de la insignia eJPT en Vectores SVG (Máxima Calidad)
+        const EJptBadgeSVG = () => (
+            <svg viewBox="0 0 100 130" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-full h-full drop-shadow-xl group-hover:drop-shadow-[0_0_20px_rgba(233,30,99,0.5)] transition-all">
+                {/* Ribbon Background at bottom */}
+                <path d="M25 80 L25 130 L50 115 L75 130 L75 80 Z" fill="#C2185B"/>
+
+                {/* Outer Hexagon Ring (Pink) */}
+                <path d="M50 0 L100 28 L100 88 L50 116 L0 88 L0 28 Z" fill="#E91E63"/>
+                <path d="M50 15 L85 36 L85 80 L50 100 L15 80 L15 36 Z" fill="#0B0F19"/>
+
+                {/* Inner Vertical Banner (Purple) */}
+                <path d="M25 12 L75 12 L75 75 L50 90 L25 75 Z" fill="#7B1FA2"/>
+
+                {/* Crossed Swords */}
+                <g stroke="url(#swordGrad)" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                    {/* Sword Left to Right */}
+                    <path d="M35 32 Q45 35 62 52" />
+                    {/* Sword Right to Left */}
+                    <path d="M65 32 Q55 35 38 52" />
+                    {/* Handles */}
+                    <path d="M30 48 L40 58" />
+                    <path d="M70 48 L60 58" />
+                </g>
+
+                {/* Text eJPT */}
+                <text x="50" y="70" fontFamily="Inter, sans-serif" fontWeight="800" fontSize="18" fill="#ffffff" textAnchor="middle">eJPT</text>
+
+                <defs>
+                    <linearGradient id="swordGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                        <stop offset="0%" stopColor="#D500F9" />
+                        <stop offset="100%" stopColor="#FF4081" />
+                    </linearGradient>
+                </defs>
+            </svg>
+        );
+
+        const CertImage = ({ title }) => {
+            // Renderizamos nuestro SVG nativo para el eJPT
+            if (title && title.includes('eJPT')) {
+                return <EJptBadgeSVG />;
+            }
+            return null;
+        };
+
+        const App = () => {
+            const [lang, setLang] = useState('es');
+            const content = data[lang];
+
+            return (
+                <div className="min-h-screen text-slate-200 font-sans antialiased selection:bg-accent selection:text-white pb-20">
+                    
+                    {/* NAVBAR */}
+                    <nav className="fixed top-0 w-full z-50 glass-card border-x-0 border-t-0 rounded-none bg-dark/80 backdrop-blur-md">
+                        <div className="max-w-6xl mx-auto px-6 py-4 flex justify-between items-center">
+                            <div className="font-bold text-xl tracking-wider">
+                                J.AMORÓS<span className="text-accent">.</span>
+                            </div>
+                            
+                            {/* Language Switcher */}
+                            <div className="flex gap-2 bg-darker/50 p-1 rounded-full border border-white/10">
+                                {['es', 'en', 'de'].map(l => (
+                                    <button 
+                                        key={l}
+                                        onClick={() => setLang(l)}
+                                        className={`px-3 py-1 text-xs font-semibold rounded-full uppercase tracking-wider transition-all duration-300 ${lang === l ? 'bg-accent text-white shadow-[0_0_15px_rgba(56,189,248,0.4)]' : 'text-slate-400 hover:text-white hover:bg-white/5'}`}
+                                    >
+                                        {l}
+                                    </button>
+                                ))}
+                            </div>
+                        </div>
+                    </nav>
+
+                    <main className="pt-32 max-w-5xl mx-auto px-6">
+                        
+                        {/* HERO SECTION */}
+                        <section className="fade-in flex flex-col md:flex-row gap-12 items-center mb-24">
+                            <div className="w-48 h-48 md:w-64 md:h-64 flex-shrink-0 profile-img-container shadow-2xl">
+                                {/* Ensure the image is in the same folder, fallback to a placeholder if not found locally */}
+                                <img 
+                                    src="./11028728-7b10-44e9-97b5-487649048677.jpg" 
+                                    alt="Juan Amorós Garcia" 
+                                    className="w-full h-full object-cover object-top"
+                                    onError={(e) => { e.target.onerror = null; e.target.src = 'https://ui-avatars.com/api/?name=Juan+Amoros&size=512&background=0B0F19&color=38bdf8'; }}
+                                />
+                            </div>
+                            
+                            <div className="text-center md:text-left flex-1">
+                                <h1 className="text-4xl md:text-6xl font-bold mb-2 tracking-tight">Juan Amorós <span className="text-accent">García</span></h1>
+                                <p className="text-xl md:text-2xl text-slate-400 mb-6 font-light">{content.hero.role}</p>
+                                
+                                <div className="flex flex-col md:flex-row gap-4 mb-8 text-sm text-slate-300 justify-center md:justify-start">
+                                    <a href="mailto:amorosgarciaj@gmail.com" className="flex items-center gap-2 hover:text-accent transition-colors"><Icons.Mail /> amorosgarciaj@gmail.com</a>
+                                    <a href="tel:+34653990434" className="flex items-center gap-2 hover:text-accent transition-colors"><Icons.Phone /> +34 653 99 04 34</a>
+                                    <span className="flex items-center gap-2"><Icons.MapPin /> {content.hero.location}</span>
+                                </div>
+                                
+                                <div className="glass-card p-6 rounded-2xl relative overflow-hidden group">
+                                    <div className="absolute top-0 left-0 w-1 h-full bg-accent transition-all duration-300 group-hover:w-2"></div>
+                                    <p className="text-slate-300 leading-relaxed text-lg italic">
+                                        "{content.about.text}"
+                                    </p>
+                                </div>
+                            </div>
+                        </section>
+
+                        <div className="grid grid-cols-1 lg:grid-cols-3 gap-12">
+                            
+                            {/* LEFT COLUMN: Experience */}
+                            <div className="lg:col-span-2 space-y-12 fade-in delay-100">
+                                
+                                {/* EXPERIENCE */}
+                                <section>
+                                    <h2 className="text-2xl font-bold mb-8 flex items-center gap-3">
+                                        <div className="w-8 h-[2px] bg-accent"></div>
+                                        {content.experience.title}
+                                    </h2>
+                                    
+                                    <div className="relative border-l border-white/10 ml-4 space-y-8 pb-4">
+                                        {content.experience.items.map((job, idx) => (
+                                            <div key={idx} className="relative pl-8 timeline-item group">
+                                                {/* Node */}
+                                                <div className="timeline-dot absolute w-3 h-3 bg-slate-600 rounded-full -left-[6.5px] top-2 border-2 border-[#0B0F19]"></div>
+                                                
+                                                <div className="glass-card p-6 rounded-xl">
+                                                    <div className="flex flex-col sm:flex-row sm:justify-between sm:items-baseline mb-2">
+                                                        <h3 className="text-xl font-semibold text-white group-hover:text-accent transition-colors">{job.role}</h3>
+                                                        <span className="text-sm text-slate-400 flex items-center mt-1 sm:mt-0 font-mono bg-white/5 px-2 py-1 rounded">
+                                                            <Icons.Calendar /> {job.date}
+                                                        </span>
+                                                    </div>
+                                                    <p className="text-accent/80 font-medium mb-3">{job.company}</p>
+                                                    <p className="text-slate-400 text-sm leading-relaxed">{job.desc}</p>
+                                                </div>
+                                            </div>
+                                        ))}
+                                    </div>
+                                </section>
+                            </div>
+
+                            {/* RIGHT COLUMN: Education, Skills & Contact */}
+                            <div className="space-y-12 fade-in delay-200">
+                                
+                                {/* EDUCATION */}
+                                <section>
+                                    <h2 className="text-2xl font-bold mb-8 flex items-center gap-3">
+                                        <div className="w-8 h-[2px] bg-accent"></div>
+                                        {content.education.title}
+                                    </h2>
+                                    
+                                    <div className="space-y-4">
+                                        {content.education.items.map((edu, idx) => (
+                                            <div key={idx} className="glass-card p-5 rounded-xl group relative overflow-hidden flex items-center gap-4">
+                                                <div className="absolute -right-4 -top-4 w-16 h-16 bg-accent/5 rounded-full blur-xl group-hover:bg-accent/20 transition-all"></div>
+                                                <div className="flex-1 relative z-10">
+                                                    <h3 className="font-semibold text-white group-hover:text-accent transition-colors">{edu.degree}</h3>
+                                                    <p className="text-sm text-slate-400 mt-1">{edu.school}</p>
+                                                    <p className="text-xs text-accent/60 mt-2 font-mono">{edu.date}</p>
+                                                    {edu.desc && <p className="text-sm text-slate-500 mt-3 border-t border-white/5 pt-3">{edu.desc}</p>}
+                                                </div>
+                                                {edu.image && (
+                                                    <div className="w-16 h-20 shrink-0 relative z-10 transform group-hover:scale-110 transition-all duration-500 flex items-center justify-center">
+                                                        <CertImage title={edu.degree} />
+                                                    </div>
+                                                )}
+                                            </div>
+                                        ))}
+                                    </div>
+                                </section>
+
+                                {/* SKILLS */}
+                                <section>
+                                    <h2 className="text-2xl font-bold mb-8 flex items-center gap-3">
+                                        <div className="w-8 h-[2px] bg-accent"></div>
+                                        {content.skills.title}
+                                    </h2>
+                                    
+                                    <div className="glass-card p-6 rounded-xl space-y-6">
+                                        <div>
+                                            <h4 className="text-sm uppercase tracking-widest text-slate-500 mb-3 font-semibold">Soft Skills</h4>
+                                            <div className="flex flex-wrap gap-2">
+                                                {content.skills.soft.map((skill, i) => (
+                                                    <span key={i} className="px-3 py-1.5 text-xs font-medium bg-white/5 text-slate-300 rounded-md border border-white/5 hover:border-accent/50 hover:bg-accent/10 hover:text-white transition-all cursor-default">
+                                                        {skill}
+                                                    </span>
+                                                ))}
+                                            </div>
+                                        </div>
+
+                                        <div>
+                                            <h4 className="text-sm uppercase tracking-widest text-slate-500 mb-3 font-semibold">Hard Skills</h4>
+                                            <div className="flex flex-wrap gap-2">
+                                                {content.skills.tech.map((skill, i) => (
+                                                    <span key={i} className="px-3 py-1.5 text-xs font-medium bg-darker text-slate-300 rounded-md border border-white/10 hover:border-accent hover:text-accent transition-all cursor-default">
+                                                        {skill}
+                                                    </span>
+                                                ))}
+                                            </div>
+                                        </div>
+
+                                        <div className="pt-4 border-t border-white/10">
+                                            <div className="space-y-3">
+                                                {content.skills.langs.map((lang, i) => (
+                                                    <div key={i} className="flex justify-between items-center group">
+                                                        <span className="text-sm text-slate-300 group-hover:text-white transition-colors">{lang.name}</span>
+                                                        <span className="text-xs font-mono px-2 py-1 bg-accent/10 text-accent rounded group-hover:bg-accent group-hover:text-dark transition-all">{lang.level}</span>
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        </div>
+                                    </div>
+                                </section>
+
+                                {/* CONTACTO */}
+                                <section>
+                                    <h2 className="text-2xl font-bold mb-8 flex items-center gap-3">
+                                        <div className="w-8 h-[2px] bg-accent"></div>
+                                        {content.contact.title}
+                                    </h2>
+                                    
+                                    <div className="glass-card p-6 rounded-xl space-y-4">
+                                        <a href="mailto:amorosgarciaj@gmail.com" className="flex items-center gap-4 p-3 rounded-xl hover:bg-white/5 border border-transparent hover:border-white/10 transition-all group overflow-hidden">
+                                            <div className="p-3 bg-accent/10 text-accent rounded-full group-hover:bg-accent group-hover:text-dark transition-colors shrink-0">
+                                                <Icons.Mail />
+                                            </div>
+                                            <div className="flex-1 min-w-0">
+                                                <p className="text-xs text-slate-500 uppercase tracking-wider font-semibold mb-1">{content.contact.emailLabel}</p>
+                                                <p className="font-medium text-white truncate">amorosgarciaj@gmail.com</p>
+                                            </div>
+                                            <Icons.ArrowRight />
+                                        </a>
+
+                                        <a href="tel:+34653990434" className="flex items-center gap-4 p-3 rounded-xl hover:bg-white/5 border border-transparent hover:border-white/10 transition-all group overflow-hidden">
+                                            <div className="p-3 bg-accent/10 text-accent rounded-full group-hover:bg-accent group-hover:text-dark transition-colors shrink-0">
+                                                <Icons.Phone />
+                                            </div>
+                                            <div className="flex-1 min-w-0">
+                                                <p className="text-xs text-slate-500 uppercase tracking-wider font-semibold mb-1">{content.contact.phoneLabel}</p>
+                                                <p className="font-medium text-white truncate">+34 653 99 04 34</p>
+                                            </div>
+                                            <Icons.ArrowRight />
+                                        </a>
+                                    </div>
+                                </section>
+
+                            </div>
+                        </div>
+                    </main>
+
+                    {/* FOOTER */}
+                    <footer className="mt-24 border-t border-white/5 pt-8 pb-8 text-center text-slate-500 text-sm">
+                        <p>© {new Date().getFullYear()} Juan Amorós García. {lang === 'es' ? 'Todos los derechos reservados.' : lang === 'en' ? 'All rights reserved.' : 'Alle Rechte vorbehalten.'}</p>
+                    </footer>
+                </div>
+            );
+        };
+
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<App />);
+    </script>
+</body>
+</html>
