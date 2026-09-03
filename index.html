@@ -455,9 +455,9 @@ function App() {
           <div className="brand">J. AMORÓS<span className="dot">·</span>GARCÍA</div>
           <div className="navlinks">
             <a href="#experience">{t.nav.experience}</a>
-            <a href="#recognitions">{t.nav.recognitions}</a>
             <a href="#languages">{t.nav.languages}</a>
             <a href="#education">{t.nav.education}</a>
+            <a href="#recognitions">{t.nav.recognitions}</a>
             <a href="#skills">{t.nav.skills}</a>
             <a href="#projects">{t.nav.projects}</a>
           </div>
@@ -513,28 +513,12 @@ function App() {
               </div>
             </section>
 
-            <section className="block" id="recognitions">
-              <div className="block-head">
-                <span className="idx mono">02</span>
-                <h2>{t.recognitions.title}</h2>
-                <span className="rule"></span>
-              </div>
-              {t.recognitions.items.map((r, i) => (
-                <div className="recog-card" key={i}>
-                  <div className="recog-top">
-                    <Icon.Check />
-                    <span className="recog-org">{r.org}</span>
-                  </div>
-                  <div className="recog-desc">{r.desc}</div>
-                </div>
-              ))}
-            </section>
           </div>
 
           <div>
             <section className="block" id="languages">
               <div className="block-head">
-                <span className="idx mono">03</span>
+                <span className="idx mono">02</span>
                 <h2>{t.languages.title}</h2>
                 <span className="rule"></span>
               </div>
@@ -555,7 +539,7 @@ function App() {
 
             <section className="block" id="education">
               <div className="block-head">
-                <span className="idx mono">04</span>
+                <span className="idx mono">03</span>
                 <h2>{t.education.title}</h2>
                 <span className="rule"></span>
               </div>
@@ -573,6 +557,23 @@ function App() {
                     <span>{ed.date}</span>
                   </div>
                   {ed.desc && <div className="card-desc">{ed.desc}</div>}
+                </div>
+              ))}
+            </section>
+
+            <section className="block" id="recognitions">
+              <div className="block-head">
+                <span className="idx mono">04</span>
+                <h2>{t.recognitions.title}</h2>
+                <span className="rule"></span>
+              </div>
+              {t.recognitions.items.map((r, i) => (
+                <div className="recog-card" key={i}>
+                  <div className="recog-top">
+                    <Icon.Check />
+                    <span className="recog-org">{r.org}</span>
+                  </div>
+                  <div className="recog-desc">{r.desc}</div>
                 </div>
               ))}
             </section>
